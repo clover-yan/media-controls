@@ -532,13 +532,15 @@ class PanelButton extends PanelMenu.Button {
         }
         const width = this.getMenuItemWidth();
         this.menuLabelTitle = new ScrollingLabel({
-            text: this.playerProxy.metadata["xesam:title"],
+            text: this.sanitizeLabelText(this.playerProxy.metadata["xesam:title"]),
             isScrolling: this.extension.scrollLabels,
             initPaused: this.playerProxy.playbackStatus !== PlaybackStatus.PLAYING,
             width,
         });
-        const artistText = this.playerProxy.metadata["xesam:artist"]?.join(", ") || _("Unknown artist");
-        const albumText = this.playerProxy.metadata["xesam:album"] || "";
+        const artistText = this.sanitizeLabelText(
+            this.playerProxy.metadata["xesam:artist"]?.join(", ") || _("Unknown artist"),
+        );
+        const albumText = this.sanitizeLabelText(this.playerProxy.metadata["xesam:album"] || "");
         this.menuLabelSubtitle = new ScrollingLabel({
             text: albumText === "" ? artistText : `${artistText} / ${albumText}`,
             isScrolling: this.extension.scrollLabels,
@@ -602,8 +604,8 @@ class PanelButton extends PanelMenu.Button {
                 this.playerProxy.loopStatus === LoopStatus.NONE
                     ? ControlIconOptions.LOOP_NONE
                     : this.playerProxy.loopStatus === LoopStatus.TRACK
-                        ? ControlIconOptions.LOOP_TRACK
-                        : ControlIconOptions.LOOP_PLAYLIST,
+                      ? ControlIconOptions.LOOP_TRACK
+                      : ControlIconOptions.LOOP_PLAYLIST,
                 this.playerProxy.loopStatus != null,
                 this.playerProxy.toggleLoop.bind(this.playerProxy),
             );
@@ -883,6 +885,15 @@ class PanelButton extends PanelMenu.Button {
 
     /**
      * @private
+     * @param {string} text
+     * @returns {string}
+     */
+    sanitizeLabelText(text) {
+        return (text || "").replace(/[\r\n]+/g, " ");
+    }
+
+    /**
+     * @private
      * @returns {string}
      */
     getButtonLabelText() {
@@ -902,7 +913,7 @@ class PanelButton extends PanelMenu.Button {
                 labelTextElements.push(labelElement);
             }
         }
-        return labelTextElements.join(" ");
+        return this.sanitizeLabelText(labelTextElements.join(" "));
     }
 
     /**
